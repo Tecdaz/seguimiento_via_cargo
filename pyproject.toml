@@ -1,0 +1,11 @@
+[project]
+name = "seguimiento-via-cargo"
+version = "0.1.0"
+description = "Un bot de Telegram para seguimiento de envíos de Via Cargo usando OpenAI y Playwright."
+authors = [{name = "Santiago Arias", email = "santi99oca@gmail.com"}]
+requires-python = ">=3.12"
+dependencies = [
+    "python-telegram-bot>=22.5",
+    "openai>=2.3.0",
+    "playwright>=1.55.0",
+]

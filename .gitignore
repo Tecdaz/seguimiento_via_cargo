@@ -1,0 +1,15 @@
+# Archivos de entorno
+.env
+
+# Archivos de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Dependencias de Poetry
+.venv/
+poetry.lock
+
+# Local example request (sensitive/test data)
+ejemploPeticion.json
