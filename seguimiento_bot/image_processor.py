@@ -19,7 +19,7 @@ async def extract_text_from_image(image_bytes: bytes) -> str | None:
                 {
                     "role": "user",
                     "content": [
-                        {"type": "text", "text": "Extrae el número de seguimiento o guía de esta imagen. Devuelve únicamente el número, sin texto adicional."},
+                        {"type": "text", "text": "Extrae el número de seguimiento o guía de esta imagen, el mismo se encuentra debajo del codigo de barras ubicado en la parte superior derecha despues de las letras GUIA No. y se compone de 12 digitos. Devuelve únicamente el número, sin texto adicional."},
                         {
                             "type": "image_url",
                             "image_url": {
@@ -28,8 +28,7 @@ async def extract_text_from_image(image_bytes: bytes) -> str | None:
                         },
                     ],
                 }
-            ],
-            max_tokens=100,
+            ]
         )
         text = response.choices[0].message.content.strip()
         logger.info(f"Texto extraído por OpenAI: {text}")

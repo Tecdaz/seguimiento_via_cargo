@@ -1,7 +1,7 @@
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 
 from seguimiento_bot.config import TELEGRAM_TOKEN, OPENAI_API_KEY, logger
-from seguimiento_bot.bot_handlers import start, handle_image
+from seguimiento_bot.bot_handlers import start, handle_image, handle_text
 
 def main() -> None:
     """Inicia el bot de Telegram."""
@@ -14,6 +14,7 @@ def main() -> None:
 
     # Handlers
     application.add_handler(CommandHandler("start", start))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     application.add_handler(MessageHandler(filters.PHOTO, handle_image))
 
     # Iniciar el bot
