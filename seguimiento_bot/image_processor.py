@@ -10,27 +10,26 @@ async def extract_text_from_image(image_bytes: bytes) -> str | None:
         return None
     
     logger.info("Enviando imagen a OpenAI para extracción de texto...")
-    base64_image = base64.b64encode(image_bytes).decode("utf-8")
+    image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+   
     
     try:
-        response = await client.chat.completions.create(
-            model="gpt-4.1-nano-2025-04-14",
-            messages=[
+        response = await client.responses.create(
+            model="gpt-5-nano",
+            instructions="Extrae el número de seguimiento o guía de la imagen suministrada, el mismo se encuentra debajo del codigo de barras ubicado en la parte superior derecha despues de las letras 'GUIA No.' y se compone de 12 digitos. Devuelve únicamente el número, sin texto adicional.",
+            input=[
                 {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": "Extrae el número de seguimiento o guía de esta imagen, el mismo se encuentra debajo del codigo de barras ubicado en la parte superior derecha despues de las letras GUIA No. y se compone de 12 digitos. Devuelve únicamente el número, sin texto adicional."},
+                    'role': 'user',
+                    'content': [
                         {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{base64_image}"
-                            },
-                        },
-                    ],
+                            'type': 'input_image',
+                            'image_url': f"data:image/jpeg;base64,{image_base64}"
+                        }
+                    ]
                 }
             ]
         )
-        text = response.choices[0].message.content.strip()
+        text = response.output_text
         logger.info(f"Texto extraído por OpenAI: {text}")
         return text
     except Exception as e:

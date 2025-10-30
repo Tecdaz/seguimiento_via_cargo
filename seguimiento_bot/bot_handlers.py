@@ -59,8 +59,7 @@ async def handle_image(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         photo_file: File = await context.bot.get_file(update.message.photo[-1].file_id)
         image_bytes = await photo_file.download_as_bytearray()
 
-        # 1. Extraer texto de la imagen
-        tracking_number = await extract_text_from_image(bytes(image_bytes))
+        tracking_number = await extract_text_from_image(image_bytes)
         if not tracking_number:
             await update.message.reply_text("No pude extraer un número de seguimiento de la imagen. Intenta con una foto más clara.")
             return

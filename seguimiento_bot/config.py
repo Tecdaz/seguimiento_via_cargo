@@ -1,12 +1,15 @@
 import os
 import logging
 from openai import AsyncOpenAI
+from dotenv import load_dotenv
 
 # --- Configuración de Logging ---
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 logger = logging.getLogger(__name__)
+
+load_dotenv()
 
 # --- Carga de API Keys ---
 # Carga las API keys desde variables de entorno para mayor seguridad

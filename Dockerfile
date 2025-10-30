@@ -1,25 +1,33 @@
-# Usar la imagen oficial de Playwright que incluye Python y las dependencias de los navegadores
-FROM python:bookworm
+# Stage 1: Builder
+FROM python:3.12-slim-bookworm AS builder
 
-# Establecer el directorio de trabajo en el contenedor
 WORKDIR /app
 
-# Instalar uv, nuestro gestor de paquetes
+# Instalar dependencias de build
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN pip install uv
 
-# Copiar el archivo que define las dependencias para aprovechar el cache de Docker
 COPY pyproject.toml ./
-
-# Instalar las dependencias del proyecto usando uv
-# El comando '-e .' instala el proyecto en modo editable y sus dependencias de pyproject.toml
 RUN uv pip install -e . --system
 
-# Instalar Playwright
-RUN playwright install --with-deps
+# Stage 2: Runtime
+FROM python:3.12-slim-bookworm
 
-# Copiar el resto del código de la aplicación al directorio de trabajo
+WORKDIR /app
+
+# Copiar solo lo necesario del builder
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+
+# Instalar solo las dependencias mínimas para chromium headless
+RUN playwright install chromium && \
+    playwright install-deps chromium && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY . .
 
-# Comando para ejecutar la aplicación cuando se inicie el contenedor
-# Las API keys se pasarán como variables de entorno al ejecutar el contenedor
 CMD ["python3", "main.py"]
