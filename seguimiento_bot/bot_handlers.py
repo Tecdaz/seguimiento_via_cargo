@@ -2,12 +2,15 @@ from telegram import Update, File
 from telegram.ext import ContextTypes
 
 from .config import logger
-from .image_processor import extract_text_from_image
+from .image_processor import extract_text_from_image, save_image_to_cache
 from .web_scraper import get_tracking_data
 from .data_processor import process_tracking_data
 
-async def _get_and_send_tracking_info(update: Update, tracking_number: str) -> None:
-    """Helper function to get and send tracking information."""
+async def _get_and_send_tracking_info(update: Update, tracking_number: str) -> bool:
+    """
+    Helper function to get and send tracking information.
+    Returns True if tracking data was found and sent, False otherwise.
+    """
     await update.message.reply_text(tracking_number)
 
     try:
@@ -15,17 +18,19 @@ async def _get_and_send_tracking_info(update: Update, tracking_number: str) -> N
         tracking_data = await get_tracking_data(tracking_number)
         if not tracking_data:
             await update.message.reply_text("No pude obtener la información de seguimiento. Es posible que el número no sea válido o que el servicio no esté disponible.")
-            return
+            return False
 
         # 3. Procesar y formatear los datos para el usuario
         user_message = process_tracking_data(tracking_data)
 
         # 4. Enviar resultado al usuario
         await update.message.reply_text(user_message)
+        return True
 
     except Exception as e:
         logger.error(f"Error in _get_and_send_tracking_info: {e}")
         await update.message.reply_text("Ocurrió un error inesperado al procesar tu solicitud.")
+        return False
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -64,7 +69,10 @@ async def handle_image(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             await update.message.reply_text("No pude extraer un número de seguimiento de la imagen. Intenta con una foto más clara.")
             return
 
-        await _get_and_send_tracking_info(update, tracking_number)
+        success = await _get_and_send_tracking_info(update, tracking_number)
+        
+        if success:
+            save_image_to_cache(image_bytes, tracking_number)
 
     except Exception as e:
         logger.error(f"Error en handle_image: {e}")
